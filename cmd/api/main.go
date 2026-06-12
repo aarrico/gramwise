@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/aarrico/gramwise/internal/api"
+	"github.com/aarrico/gramwise/internal/db"
 )
 
 func main() {
@@ -35,6 +37,10 @@ func run(logger *slog.Logger) error {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		return errors.New("DATABASE_URL is required")
+	}
+
+	if err := db.Migrate(ctx, dsn); err != nil {
+		return fmt.Errorf("migrate: %w", err)
 	}
 
 	pool, err := pgxpool.New(ctx, dsn)
