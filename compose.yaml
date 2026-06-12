@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: gramwise
+      POSTGRES_PASSWORD: gramwise
+      POSTGRES_DB: gramwise
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gramwise"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://gramwise:gramwise@postgres:5432/gramwise
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
