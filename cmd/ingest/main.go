@@ -49,7 +49,7 @@ func run(logger *slog.Logger) error {
 	}
 
 	datasets := make([]string, 0, len(datasetNames))
-	for _, short := range strings.Split(*datasetsFlag, ",") {
+	for short := range strings.SplitSeq(*datasetsFlag, ",") {
 		dt, ok := datasetNames[strings.TrimSpace(short)]
 		if !ok {
 			return fmt.Errorf("unknown dataset %q (want: foundation, sr_legacy)", short)

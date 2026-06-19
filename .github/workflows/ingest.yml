@@ -13,7 +13,7 @@ on:
     - cron: "17 6 1 * *" # monthly; picks up Foundation refreshes
 
 env:
-  FOUNDATION_URL: ${{ inputs.foundation_url || 'https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_csv_2025-04-24.zip' }}
+  FOUNDATION_URL: ${{ inputs.foundation_url || 'https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_csv_2026-04-30.zip' }}
   SR_LEGACY_URL: ${{ inputs.sr_legacy_url || 'https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip' }}
 
 jobs:

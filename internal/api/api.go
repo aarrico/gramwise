@@ -24,7 +24,7 @@ func New(cfg Config) http.Handler {
 	humaAPI := humago.New(mux, huma.DefaultConfig("Gramwise API", "0.1.0"))
 
 	registerHello(humaAPI)
-	registerHealthz(humaAPI, cfg.DB)
+	registerHealth(humaAPI, cfg.DB)
 
 	var h http.Handler = mux
 	h = logging(cfg.Logger, h)
@@ -59,11 +59,11 @@ type healthOutput struct {
 	}
 }
 
-func registerHealthz(humaAPI huma.API, db Pinger) {
+func registerHealth(humaAPI huma.API, db Pinger) {
 	huma.Register(humaAPI, huma.Operation{
-		OperationID: "healthz",
+		OperationID: "health",
 		Method:      http.MethodGet,
-		Path:        "/healthz",
+		Path:        "/health",
 		Summary:     "Health check, pings the database",
 	}, func(ctx context.Context, _ *struct{}) (*healthOutput, error) {
 		ctx, cancel := context.WithTimeout(ctx, 2*time.Second)

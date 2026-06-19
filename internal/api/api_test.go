@@ -45,7 +45,7 @@ func TestHello(t *testing.T) {
 	}
 }
 
-func TestHealthz(t *testing.T) {
+func TestHealth(t *testing.T) {
 	tests := []struct {
 		name string
 		db   api.Pinger
@@ -58,7 +58,7 @@ func TestHealthz(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h := newTestHandler(t, tt.db)
 			rec := httptest.NewRecorder()
-			h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/healthz", nil))
+			h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/health", nil))
 			if rec.Code != tt.want {
 				t.Fatalf("status = %d, want %d", rec.Code, tt.want)
 			}

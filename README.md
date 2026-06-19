@@ -15,7 +15,7 @@ docker compose up --build
 
 - API: <http://localhost:8080/v1/hello>
 - Docs (OpenAPI): <http://localhost:8080/docs>
-- Health: <http://localhost:8080/healthz>
+- Health: <http://localhost:8080/health>
 
 ## Development
 
@@ -27,5 +27,4 @@ go test ./...
 
 ## Status
 
-Milestone 1 (walking skeleton) — see [`docs/plan.md`](docs/plan.md) for the
-roadmap.
+Ingestion pipeline complete and deployed to GCP (API) and Neon (Postgres DB).
