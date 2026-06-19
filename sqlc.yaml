@@ -9,5 +9,5 @@ sql:
         out: "internal/db"
         sql_package: "pgx/v5"
         overrides:
-          - db_type: "pg_catalog.timestamptz"
+          - db_type: "timestamptz"
             go_type: "time.Time"

@@ -7,24 +7,26 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const insertIngestRun = `-- name: InsertIngestRun :exec
 INSERT INTO ingest_runs (
-    started_at, finished_at, source, datasets, rows_staged, rows_upserted, duration_ms
-) VALUES ($1, $2, $3, $4, $5, $6, $7)
+    started_at, finished_at, source, datasets, rows_staged, rows_upserted,
+    rows_skipped, rows_malformed, duration_ms
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 `
 
 type InsertIngestRunParams struct {
-	StartedAt    pgtype.Timestamptz
-	FinishedAt   pgtype.Timestamptz
-	Source       string
-	Datasets     []string
-	RowsStaged   int32
-	RowsUpserted int32
-	DurationMs   int64
+	StartedAt     time.Time
+	FinishedAt    time.Time
+	Source        string
+	Datasets      []string
+	RowsStaged    int32
+	RowsUpserted  int32
+	RowsSkipped   int32
+	RowsMalformed int32
+	DurationMs    int64
 }
 
 func (q *Queries) InsertIngestRun(ctx context.Context, arg InsertIngestRunParams) error {
@@ -35,6 +37,8 @@ func (q *Queries) InsertIngestRun(ctx context.Context, arg InsertIngestRunParams
 		arg.Datasets,
 		arg.RowsStaged,
 		arg.RowsUpserted,
+		arg.RowsSkipped,
+		arg.RowsMalformed,
 		arg.DurationMs,
 	)
 	return err

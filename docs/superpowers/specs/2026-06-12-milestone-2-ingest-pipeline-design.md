@@ -16,7 +16,7 @@ Parent plan: `docs/plan.md` (milestone 2)
 - **Pipeline shape (Approach A):** staging table + set-based upsert, not row-by-row batches — preserves the COPY performance story for the future Branded-Foods 250x milestone.
 - **Plan deviation, accepted:** testcontainers-go arrives now (golden-file DB-state tests need a real disposable Postgres); M3 extends this harness rather than introducing it.
 
-## Schema (goose migration 0001)
+## Schema (goose migrations 0001–0003)
 
 ```sql
 CREATE TABLE foods (
@@ -42,11 +42,13 @@ CREATE TABLE ingest_runs (
     datasets        text[] NOT NULL,
     rows_staged     int NOT NULL,
     rows_upserted   int NOT NULL,           -- rows actually inserted or changed
+    rows_skipped    int NOT NULL DEFAULT 0, -- 0002: well-formed foods dropped for incomplete macros
+    rows_malformed  int NOT NULL DEFAULT 0, -- 0002: rows dropped for an unparseable field
     duration_ms     bigint NOT NULL
 );
 ```
 
-Notes: `staging_foods` is `UNLOGGED` (created explicitly, not via LIKE, in the actual migration — LIKE shown for intent). All amounts are per 100g, USDA's basis for Foundation/SR Legacy. Migrations run via goose with `embed.FS` from both binaries at startup (`goose.Up`), so compose, CI, and the Action need no separate migration step.
+Notes: `staging_foods` is `UNLOGGED` (created explicitly, not via LIKE, in the actual migration — LIKE shown for intent). All amounts are per 100g, USDA's basis for Foundation/SR Legacy. Migrations run via goose with `embed.FS` from both binaries at startup (`goose.Up`), so compose, CI, and the Action need no separate migration step. Migration `0002` added the `rows_skipped`/`rows_malformed` audit columns; `0003` added `CHECK (… >= 0)` constraints on each `foods` macro column as defense-in-depth against a future writer bypassing the parser.
 
 ## CSV → macros mapping
 
@@ -65,8 +67,8 @@ Foods missing any of the three macronutrients are skipped and counted (logged in
 3. Begin tx: `TRUNCATE staging_foods`; `pgx.CopyFrom` all rows into staging.
 4. Set-based upsert in the same tx:
    `INSERT INTO foods SELECT ... FROM staging_foods ON CONFLICT (fdc_id) DO UPDATE SET ... WHERE (foods.description, foods.dataset_source, foods.protein_g, foods.carbs_g, foods.fat_g, foods.kcal) IS DISTINCT FROM (excluded.description, excluded.dataset_source, excluded.protein_g, excluded.carbs_g, excluded.fat_g, excluded.kcal)` — the guard compares **data columns only**, never `updated_at`, so re-running identical data touches zero rows (what the idempotency test asserts via the statement's row count). `updated_at` is set to `now()` only inside the `DO UPDATE SET`, i.e. only when data actually changed.
-5. Insert `ingest_runs` row; commit. Failure anywhere rolls back the whole run — `foods` is never partially updated.
-6. Log JSON summary via slog: datasets, staged, upserted, skipped, duration.
+5. Insert `ingest_runs` row (including `rows_skipped`/`rows_malformed`); commit. Failure anywhere rolls back the whole run — `foods` is never partially updated.
+6. Log JSON summary via slog: datasets, staged, upserted, skipped, malformed, duration.
 
 ## Package layout
 

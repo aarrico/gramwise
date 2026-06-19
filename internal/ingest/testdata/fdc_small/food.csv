@@ -1,0 +1,7 @@
+"fdc_id","data_type","description","food_category_id","publication_date"
+"100001","foundation_food","Butter, salted","1","2026-04-01"
+"100002","foundation_food","Egg, whole, raw","1","2026-04-01"
+"100003","sr_legacy_food","Chicken, breast, raw","5","2019-04-01"
+"100004","sr_legacy_food","Rice, white, cooked","20","2019-04-01"
+"100005","branded_food","Protein Bar, chocolate","3","2026-04-01"
+"100006","foundation_food","Mystery food, incomplete","1","2026-04-01"

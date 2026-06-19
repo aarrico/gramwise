@@ -5,6 +5,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -16,18 +18,20 @@ type Food struct {
 	CarbsG        pgtype.Numeric
 	FatG          pgtype.Numeric
 	Kcal          pgtype.Numeric
-	UpdatedAt     pgtype.Timestamptz
+	UpdatedAt     time.Time
 }
 
 type IngestRun struct {
-	ID           int64
-	StartedAt    pgtype.Timestamptz
-	FinishedAt   pgtype.Timestamptz
-	Source       string
-	Datasets     []string
-	RowsStaged   int32
-	RowsUpserted int32
-	DurationMs   int64
+	ID            int64
+	StartedAt     time.Time
+	FinishedAt    time.Time
+	Source        string
+	Datasets      []string
+	RowsStaged    int32
+	RowsUpserted  int32
+	DurationMs    int64
+	RowsSkipped   int32
+	RowsMalformed int32
 }
 
 type StagingFood struct {
