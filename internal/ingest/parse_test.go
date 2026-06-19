@@ -135,6 +135,36 @@ func TestParseMalformedFoodFdcID(t *testing.T) {
 	}
 }
 
+// USDA "carbohydrate by difference" (nutrient 1005) is occasionally negative for
+// high-fat/protein foods whose measured components sum to >100g. The parser clamps
+// macros to their non-negative domain so they satisfy the foods_*_nonneg checks.
+func TestParseClampsNegativeCarbs(t *testing.T) {
+	src := mapSource{
+		"food.csv": oneGoodFood,
+		"food_nutrient.csv": `"id","fdc_id","nutrient_id","amount"
+"1","100001","1003","1"
+"2","100001","1004","2"
+"3","100001","1005","-0.5"
+`,
+	}
+
+	res, err := ingest.Parse(t.Context(), src, fixtureDatasets)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Foods) != 1 {
+		t.Fatalf("got %d foods, want 1: %+v", len(res.Foods), res.Foods)
+	}
+	got := res.Foods[0]
+	if got.CarbsG != 0 {
+		t.Errorf("CarbsG = %v, want 0 (clamped)", got.CarbsG)
+	}
+	// kcal is computed from clamped macros: 4*1 + 4*0 + 9*2 = 22.
+	if got.Kcal != 22 {
+		t.Errorf("Kcal = %v, want 22 (computed from clamped carbs)", got.Kcal)
+	}
+}
+
 // RowsRead counts every data record read across both files, including rows
 // dropped by filters (it is the denominator for the malformed-rate guard).
 func TestParseRowsRead(t *testing.T) {

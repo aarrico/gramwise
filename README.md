@@ -19,10 +19,20 @@ docker compose up --build
 
 ## Development
 
+Common tasks live in the `Makefile` (`make help` lists them):
+
 ```sh
-docker compose up -d postgres
-DATABASE_URL=postgres://gramwise:gramwise@localhost:5432/gramwise go run ./cmd/api
-go test ./...
+make run                                            # API against local Postgres (auto-starts the DB)
+make test                                           # unit tests
+make ingest-fixture                                 # load the bundled CSV fixture
+make ingest SRC=/tmp/foundation.zip DS=foundation   # load real USDA data
+```
+
+`make` runs recipes in `sh`, so they behave the same under fish, bash, or zsh. To
+invoke a binary directly under fish, set the env with `env`:
+
+```fish
+env DATABASE_URL=postgres://gramwise:gramwise@localhost:5432/gramwise go run ./cmd/api
 ```
 
 ## Status

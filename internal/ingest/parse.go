@@ -72,18 +72,22 @@ func Parse(ctx context.Context, src Source, datasets map[string]bool) (*ParseRes
 			res.Skipped++
 			continue
 		}
-		kcal := 4**m.protein + 4**m.carbs + 9**m.fat
+		// USDA "carbohydrate by difference" (1005) can be slightly negative when
+		// measured components sum to >100g; clamp macros to their non-negative
+		// domain (mirrors the foods_*_nonneg CHECK constraints) before deriving kcal.
+		protein, carbs, fat := max(0, *m.protein), max(0, *m.carbs), max(0, *m.fat)
+		kcal := 4*protein + 4*carbs + 9*fat
 		if m.kcal != nil {
-			kcal = *m.kcal
+			kcal = max(0, *m.kcal)
 		}
 
 		res.Foods = append(res.Foods, FoodRow{
 			FDCID:         id,
 			Description:   f.description,
 			DatasetSource: f.dataset,
-			ProteinG:      *m.protein,
-			CarbsG:        *m.carbs,
-			FatG:          *m.fat,
+			ProteinG:      protein,
+			CarbsG:        carbs,
+			FatG:          fat,
 			Kcal:          kcal,
 		})
 	}
