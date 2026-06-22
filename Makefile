@@ -4,7 +4,7 @@ export DATABASE_URL
 DS ?= foundation
 
 .DEFAULT_GOAL := help
-.PHONY: help db-up db-down db-reset psql run build docker-build ingest-fixture ingest test test-integration lint fmt
+.PHONY: help db-up db-down db-reset psql run build docker-build ingest-fixture ingest test test-integration lint fmt generate
 
 help: ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -49,3 +49,6 @@ lint: ## Run golangci-lint
 
 fmt: ## Format all Go code
 	gofmt -w .
+
+generate: ## Regenerate sqlc
+	sqlc generate

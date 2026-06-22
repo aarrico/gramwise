@@ -11,10 +11,20 @@ import (
 )
 
 const insertIngestRun = `-- name: InsertIngestRun :exec
-INSERT INTO ingest_runs (
-    started_at, finished_at, source, datasets, rows_staged, rows_upserted,
-    rows_skipped, rows_malformed, duration_ms
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO
+    ingest_runs (
+        started_at,
+        finished_at,
+        source,
+        datasets,
+        rows_staged,
+        rows_upserted,
+        rows_skipped,
+        rows_malformed,
+        duration_ms
+    )
+VALUES
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 `
 
 type InsertIngestRunParams struct {
@@ -42,4 +52,79 @@ func (q *Queries) InsertIngestRun(ctx context.Context, arg InsertIngestRunParams
 		arg.DurationMs,
 	)
 	return err
+}
+
+const searchFoods = `-- name: SearchFoods :many
+SELECT
+    fdc_id,
+    description,
+    dataset_source,
+    protein_g,
+    carbs_g,
+    fat_g,
+    kcal,
+    count(*) OVER() as total
+FROM
+    foods
+WHERE
+    description_tsv @@ websearch_to_tsquery('english', $1)
+    OR $1 <% description
+ORDER BY
+    (
+        description_tsv @@ websearch_to_tsquery('english', $1)
+    ) DESC,
+    ts_rank(
+        description_tsv,
+        websearch_to_tsquery('english', $1)
+    ) DESC,
+    word_similarity($1, description) DESC,
+    fdc_id ASC
+LIMIT
+    $3 OFFSET $2
+`
+
+type SearchFoodsParams struct {
+	Query        string
+	ResultOffset int32
+	ResultLimit  int32
+}
+
+type SearchFoodsRow struct {
+	FdcID         int64
+	Description   string
+	DatasetSource string
+	ProteinG      float64
+	CarbsG        float64
+	FatG          float64
+	Kcal          float64
+	Total         int64
+}
+
+func (q *Queries) SearchFoods(ctx context.Context, arg SearchFoodsParams) ([]SearchFoodsRow, error) {
+	rows, err := q.db.Query(ctx, searchFoods, arg.Query, arg.ResultOffset, arg.ResultLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchFoodsRow
+	for rows.Next() {
+		var i SearchFoodsRow
+		if err := rows.Scan(
+			&i.FdcID,
+			&i.Description,
+			&i.DatasetSource,
+			&i.ProteinG,
+			&i.CarbsG,
+			&i.FatG,
+			&i.Kcal,
+			&i.Total,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

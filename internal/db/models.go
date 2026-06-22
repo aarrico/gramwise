@@ -6,19 +6,18 @@ package db
 
 import (
 	"time"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Food struct {
-	FdcID         int64
-	Description   string
-	DatasetSource string
-	ProteinG      pgtype.Numeric
-	CarbsG        pgtype.Numeric
-	FatG          pgtype.Numeric
-	Kcal          pgtype.Numeric
-	UpdatedAt     time.Time
+	FdcID          int64
+	Description    string
+	DatasetSource  string
+	ProteinG       float64
+	CarbsG         float64
+	FatG           float64
+	Kcal           float64
+	UpdatedAt      time.Time
+	DescriptionTsv interface{}
 }
 
 type IngestRun struct {
@@ -38,8 +37,8 @@ type StagingFood struct {
 	FdcID         int64
 	Description   string
 	DatasetSource string
-	ProteinG      pgtype.Numeric
-	CarbsG        pgtype.Numeric
-	FatG          pgtype.Numeric
-	Kcal          pgtype.Numeric
+	ProteinG      float64
+	CarbsG        float64
+	FatG          float64
+	Kcal          float64
 }
