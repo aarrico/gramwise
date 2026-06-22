@@ -17,6 +17,7 @@ type Pinger interface {
 type Config struct {
 	Logger *slog.Logger
 	DB     Pinger
+	Foods  FoodSearcher
 }
 
 func New(cfg Config) http.Handler {
@@ -25,6 +26,7 @@ func New(cfg Config) http.Handler {
 
 	registerHello(humaAPI)
 	registerHealth(humaAPI, cfg.DB)
+	registerSearchFoods(humaAPI, cfg.Foods)
 
 	var h http.Handler = mux
 	h = logging(cfg.Logger, h)

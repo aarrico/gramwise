@@ -51,7 +51,7 @@ func run(logger *slog.Logger) error {
 
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           api.New(api.Config{Logger: logger, DB: pool}),
+		Handler:           api.New(api.Config{Logger: logger, DB: pool, Foods: db.New(pool)}),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
