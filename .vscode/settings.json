@@ -7,5 +7,8 @@
       "source.organizeImports": "explicit"
     }
   },
-  "gopls": { "ui.semanticTokens": true }
+  "gopls": {
+    "ui.semanticTokens": true
+  },
+  "makefile.configureOnOpen": false
 }

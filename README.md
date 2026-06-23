@@ -16,6 +16,8 @@ docker compose up --build
 - API: <http://localhost:8080/v1/hello>
 - Docs (OpenAPI): <http://localhost:8080/docs>
 - Health: <http://localhost:8080/health>
+- Search: <http://localhost:8080/v1/foods?q=chicken+breast> (typo-tolerant: try `q=chiken`)
+
 
 ## Development
 
@@ -37,4 +39,5 @@ env DATABASE_URL=postgres://gramwise:gramwise@localhost:5432/gramwise go run ./c
 
 ## Status
 
-Ingestion pipeline complete and deployed to GCP (API) and Neon (Postgres DB).
+Ingestion pipeline complete.
+Search endpoint with fuzzy search implemented.
